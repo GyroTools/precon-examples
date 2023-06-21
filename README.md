@@ -2,7 +2,7 @@
 
 precon is a python package for reconstruction of Philips raw data.
 
-> **precon needs Python 3.7 or higher.**
+> **_NOTE:_ precon needs Python 3.7 or higher.**
 
 ## Installation
 
@@ -11,7 +11,7 @@ install precon using pip:
 pip install gt-precon --extra-index-url https://pypi.gyrotools.com/simple/
 ```
 
-When prompted for username and password enter your credentials for the [GyroTools user portal](https://portal.gyrotools.com/portal) 
+When prompted for username and password enter the credentials for the [GyroTools user portal](https://portal.gyrotools.com/portal) 
 
 For an automated installation without password prompt (e.g. in requirements.txt) use your personal access token for the [GyroTools user portal](https://portal.gyrotools.com/portal):
 ```python
@@ -25,6 +25,8 @@ The `<PERSONAL_ACCESS_TOKEN>` can be found in the Profile page of the [GyroTools
 ### Activation
 
 Precon is a proprietary software package and needs a license to work. Please contact [GyroTools](https://www.gyrotools.com/gt/index.php/contact-form) for details and pricing. 
+
+> **_NOTE:_** precon shares the same license with MRecon. If MRecon is already activated on the current machine then the activation for precon can be skipped. 
 
 #### Activate precon on a single machine for all users (preferred method)
 
@@ -85,6 +87,12 @@ For these applications precon can be activated with a floating license:
 > :warning: The obtained license-key is a personal key which is linked to your GyroTools portal account. Do not share it with anyone!
 Sharing it with another non-eligible person might result in the loss of your license.
 
+
+To test if precon is activated you can print the license information:
+```python
+python -m precon license --info
+```
+
 ## Basic Usage
 
 Import precon:
@@ -143,3 +151,49 @@ Please note that the read function only reads data of the same size and with the
 Examples of a complete reconstruction can be found in the [examples directory](./examples).
 
 Example data can be found in the [data directory](./data)
+
+
+## Run precon in a container
+
+It is possible, and sometimes beneficial, to run precon in a container. If the container is used on a single machine the license file can be mapped into the container and precon can be activated as describend above.
+If the container should be distributed on multiple machines a floating license needs to be added to the container as environment variable [see above](#Activate-precon-to-run-on-multiple-machines).
+
+### Build and run the container on a single machine
+
+1. Create a Dockerfile, which installs precon and copies the recon script into it. For example:
+   ```Dockerfile
+   FROM python:3.9
+
+   RUN pip install gt-precon --extra-index-url https://precon:<ACCESS_TOKEN>@pypi.gyrotools.com/simple/
+   COPY ./examples/simple_recon.py /
+   ```
+   
+2. Build the container:
+   ```bash
+   docker build -t precon .
+   ```
+   
+3. Create a license file on the host in a location of your  choice:
+   ```bash
+   mkdir /home/gyrotools/license
+   touch /home/gyrotools/license/license.key
+   ```
+   
+4. Map the license file into the container to `/etc/gyrotools` and activate precon:
+   ```bash
+   docker run --rm -v /home/gyrotools/license:/etc/gyrotools precon python -m precon license --activate <ACTIVATION_TOKEN>
+   ```
+
+5. Run the recon by mapping the license file and the data into the container:
+   ```bash
+   docker run --rm -v /home/gyrotools/license:/etc/gyrotools -v /home/gyrotools/data:/data precon python /simple_recon.py /data/rawfile.raw
+   ```
+   
+### Use the container on multiple machines
+
+1. Get a floating license key as described [above](#Activate-precon-to-run-on-multiple-machines)
+
+2. Add the key as environment variable to the container (in the build or run stage):
+   ```bash
+   docker run --rm -e PRECON_LICENSE_KEY=<YOUR_LICENSE_KEY> -v /home/gyrotools/data:/data precon python /simple_recon.py /data/rawfile.raw
+   ```
