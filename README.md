@@ -11,7 +11,7 @@ install precon using pip:
 pip install gt-precon --extra-index-url https://pypi.gyrotools.com/simple/
 ```
 
-When prompted for username and password enter the credentials of the [GyroTools user portal](https://portal.gyrotools.com/portal) 
+When prompted for username and password enter your credentials for the [GyroTools user portal](https://portal.gyrotools.com/portal) 
 
 For an automated installation without password prompt (e.g. in requirements.txt) use your personal access token for the [GyroTools user portal](https://portal.gyrotools.com/portal):
 ```python
@@ -45,7 +45,7 @@ To activate precon for all users of a Linux / OSX machine first create a license
 sudo mkdir -p /etc/gyrotools/ && sudo touch /etc/gyrotools/license.key && sudo chmod 666 /etc/gyrotools/license.key'
 ```
 
-Afterwards activate precon with:
+Then activate precon with:
 ```python
     python -m precon license --activate <ACTIVATION_TOKEN>
 ```
