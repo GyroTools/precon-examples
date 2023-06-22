@@ -38,7 +38,7 @@ To activate precon for all users of a Windows machine run the following command:
 ```
 
 The `<ACTIVATION_TOKEN>` is usually received by email, but is also displayed in the [GyroTools user portal](https://portal.gyrotools.com/portal).
-Upon activation a license file will be written in `C:\ProgramData\Gyrotools\license.key`. Make sure you have the necessary permissions to do so.
+Upon activation, a license file will be written in `C:\ProgramData\Gyrotools\license.key`. Make sure you have the necessary permissions to do so.
 
 #### Linux / Mac
 
@@ -87,6 +87,8 @@ For these applications precon can be activated with a floating license:
 > :warning: The obtained license-key is a personal key which is linked to your GyroTools portal account. Do not share it with anyone!
 Sharing it with another non-eligible person might result in the loss of your license.
 
+
+#### License Information
 
 To test if precon is activated you can print the license information:
 ```python
@@ -146,17 +148,17 @@ for mix in parameter2read.mix:
         data, labels = pr.sort(data, labels, output_size=cur_recon_resolution)
 ```
 
-Please note that the read function only reads data of the same size and with the same geometry. Therefore, you should always loop over the number of mixes and stacks. 
+Please note that the `read` function only reads data of the same size and with the same geometry. Therefore, you should always loop over the number of mixes and stacks. 
 
-Examples of a complete reconstruction can be found in the [examples directory](./examples).
+Examples of complete reconstructions can be found in the [examples directory](./examples).
 
 Example data can be found in the [data directory](./data)
 
 
 ## Run precon in a container
 
-It is possible, and sometimes beneficial, to run precon in a container. If the container is used on a single machine the license file can be mapped into the container and precon can be activated as describend above.
-If the container should be distributed on multiple machines a floating license needs to be added to the container as environment variable [see above](#Activate-precon-to-run-on-multiple-machines).
+It is possible, and sometimes beneficial, to run precon in a container. If the container is used on a single machine the license file can be mapped into the container and precon can be activated as describend [above](#Activation).
+If the container should be distributed on multiple machines a floating license needs to be added to the container as environment variable ([see above](#Activate-precon-to-run-on-multiple-machines)).
 
 ### Build and run the container on a single machine
 
