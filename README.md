@@ -1,6 +1,6 @@
 # precon 
 
-precon is a proprietary python package for reconstruction of Philips MR raw data.
+precon is a python package for reconstruction of Philips raw data.
 
 > **_NOTE:_ precon needs Python 3.7 or higher.**
 
@@ -11,24 +11,24 @@ install precon using pip:
 pip install gt-precon --extra-index-url https://pypi.gyrotools.com/simple/
 ```
 
-When prompted for username and password enter your credentials for the [GyroTools user portal](https://portal.gyrotools.com/portal). 
+When prompted for username and password enter the credentials for the [GyroTools user portal](https://portal.gyrotools.com/portal) 
 
 For an automated installation without password prompt (e.g. in requirements.txt) use your personal access token for the [GyroTools user portal](https://portal.gyrotools.com/portal):
 ```python
 pip install gt-precon --extra-index-url https://precon:<PERSONAL_ACCESS_TOKEN>@pypi.gyrotools.com/simple/
 ```
 
-The `<PERSONAL_ACCESS_TOKEN>` can be retrieved from your Profile page in the [GyroTools user portal](https://portal.gyrotools.com/portal):
+The `<PERSONAL_ACCESS_TOKEN>` can be found in the Profile page of the [GyroTools user portal](https://portal.gyrotools.com/portal):
 
 ![alt text](doc/portal_profile.jpg "Profile")
 
 ### Activation
 
-Precon is a proprietary software package and requires activation of a valid license. Please contact [GyroTools](https://www.gyrotools.com/gt/index.php/contact-form) for licensing details and pricing. 
+Precon is a proprietary software package and needs a license to work. Please contact [GyroTools](https://www.gyrotools.com/gt/index.php/contact-form) for details and pricing. 
 
-> **_NOTE:_** precon shares the same license with MRecon. If MRecon is already activated on the current machine, the activation for precon can be skipped. 
+> **_NOTE:_** precon shares the same license with MRecon. If MRecon is already activated on the current machine then the activation for precon can be skipped. 
 
-#### Activation of precon on a single machine for all users (preferred method)
+#### Activate precon on a single machine for all users (preferred method)
 
 #### Windows
 
@@ -38,11 +38,11 @@ To activate precon for all users of a Windows machine run the following command:
 ```
 
 The `<ACTIVATION_TOKEN>` is usually received by email, but is also displayed in the [GyroTools user portal](https://portal.gyrotools.com/portal).
-Upon activation, a license file will be written in `C:\ProgramData\Gyrotools\license.key`. Make sure the necessary file access permissions are available.
+Upon activation a license file will be written in `C:\ProgramData\Gyrotools\license.key`. Make sure you have the necessary permissions to do so.
 
 #### Linux / Mac
 
-To activate precon for all users of a Linux / OSX machine first create a license file in `/etc/gyrotools` and set the appropiate file write permissions for all users:
+To activate precon for all users of a Linux / OSX machine first create a license file in `/etc/gyrotools` and make sure everybody has write permissions on it:
 ```bash
 sudo mkdir -p /etc/gyrotools/ && sudo touch /etc/gyrotools/license.key && sudo chmod 666 /etc/gyrotools/license.key'
 ```
@@ -52,43 +52,41 @@ Then activate precon with:
     python -m precon license --activate <ACTIVATION_TOKEN>
 ```
 
-The `<ACTIVATION_TOKEN>` is contained in the initial license confirmation email, or retrieve it from your account in the [GyroTools user portal](https://portal.gyrotools.com/portal).
+The `<ACTIVATION_TOKEN>` is usually received by email, but is also displayed in the [GyroTools user portal](https://portal.gyrotools.com/portal).
 
-#### Activation of precon on a single machine for the current user only
+#### Activate precon on a single machine for the current user only
 
-If administrator rights are not available, precon can also be activated for the current user only:
+If you don't have administration rights, precon can also be activated for the current user only:
 ```python
     python -m precon license --activate-user <ACTIVATION_TOKEN>
 ```
 
-By doing so only the user activating precon can use it. The license file will be placed into the user's home directory under `<USER_HOME>/.gyrotools/license.key`.
+By doing so only the user which activated precon can use it. The license file will be placed into the user's home directory under `<USER_HOME>/.gyrotools/license.key`
 
-#### Activation of precon to run on multiple machines
+#### Activate precon to run on multiple machines
 
 > **_NOTE:_**  The floating license is an upgrade which needs to be purchased separately. Please contact [GyroTools](https://www.gyrotools.com/gt/index.php/contact-form) for details and pricing. 
 
 
-Sometimes it is not possible (or inconvenient) to run reconstructions on a single machine. For example when using a cluster with many different nodes or running the recon in a container in the cloud.
+Sometimes it is not possible (or inconvenient) to run reconstructions on a single machine. For example if the recon should be run on a cluster with many different nodes or if it is run in a container in the cloud.
 For these applications precon can be activated with a floating license:
 
 1. Obtain a license-key with:   
     ```     
     python -m precon license --get
     ```
-    Follow the instructions on the screen and use your [GyroTools user portal](https://portal.gyrotools.com/portal) credentials to login.
+    Follow the instructions on the screen and use the credentials of the [GyroTools user portal](https://portal.gyrotools.com/portal) to login
 
 2. Create an environment variable called `PRECON_LICENSE_KEY` with the license-key as value. E.g:
     ```
     export PRECON_LICENSE_KEY=<YOUR_LICENSE_KEY>
     ```
 
-**Prerequisite when using a floating license is an active internet connection in order for precon to connect to the GyroTools license server (https://license.gyrotools.com)**
+**When using a floating license precon needs an active internet connection in order to connect to the GyroTools license server (https://license.gyrotools.com)**
 
-> :warning: The retrieved license-key is a personal key which is linked to your GyroTools portal account. Keep your key secret and do not share it with other persons!
-Key usage not covered by your license may result in the loss of your license.
+> :warning: The obtained license-key is a personal key which is linked to your GyroTools portal account. Do not share it with anyone!
+Sharing it with another non-eligible person might result in the loss of your license.
 
-
-#### License Information
 
 To test if precon is activated you can print the license information:
 ```python
@@ -148,17 +146,17 @@ for mix in parameter2read.mix:
         data, labels = pr.sort(data, labels, output_size=cur_recon_resolution)
 ```
 
-Please note that the `read` function only reads data of the same size and with the same geometry. Therefore, you should always loop over the number of mixes and stacks. 
+Please note that the read function only reads data of the same size and with the same geometry. Therefore, you should always loop over the number of mixes and stacks. 
 
-Examples of complete reconstructions can be found in the [examples directory](./examples).
+Examples of a complete reconstruction can be found in the [examples directory](./examples).
 
 Example data can be found in the [data directory](./data)
 
 
 ## Run precon in a container
 
-It is possible, and sometimes beneficial, to run precon in a container. If the container is used on a single machine the license file can be mapped into the container and precon can be activated as describend [above](#Activation).
-If the container should be distributed on multiple machines a floating license needs to be added to the container as environment variable ([see above](#Activate-precon-to-run-on-multiple-machines)).
+It is possible, and sometimes beneficial, to run precon in a container. If the container is used on a single machine the license file can be mapped into the container and precon can be activated as describend above.
+If the container should be distributed on multiple machines a floating license needs to be added to the container as environment variable [see above](#Activate-precon-to-run-on-multiple-machines).
 
 ### Build and run the container on a single machine
 
@@ -175,7 +173,7 @@ If the container should be distributed on multiple machines a floating license n
    docker build -t precon .
    ```
    
-3. Create a license file on the host in a location of your choice:
+3. Create a license file on the host in a location of your  choice:
    ```bash
    mkdir /home/gyrotools/license
    touch /home/gyrotools/license/license.key
