@@ -6,7 +6,6 @@ from scipy.interpolate import interp1d
 from scipy.io import savemat
 
 import precon as pr
-from precon.parameter.models.label import Label
 
 parser = argparse.ArgumentParser(description='normal recon')
 parser.add_argument('rawfile', help='path to the raw or lab file')
@@ -54,7 +53,7 @@ for mix in parameter2read.mix:
             data, labels = pr.read(raw, parameter2read, pars.labels, pars.coil_info, oversampling_removal=False)
 
             # read epi correction data
-            parameter2read.typ = Label.TYPE_ECHO_PHASE
+            parameter2read.typ = pr.Label.TYPE_ECHO_PHASE
             epi_corr_data, epi_corr_labels = pr.read(raw, parameter2read, pars.labels, pars.coil_info, oversampling_removal=False)
 
         # grid the data from the nus encoding numbers to a regular grid
