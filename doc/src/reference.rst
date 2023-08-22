@@ -1,6 +1,33 @@
 Reference
 =========
 
+The Parameter Class
+*******************
+
+.. autoclass:: precon.Parameter
+    :members:
+
+The Parameter2Read Class
+************************
+
+.. autoclass:: precon.Parameter2Read
+    :members:
+
+The Sensitivity Class
+*********************
+
+.. autoclass:: precon.Sensitivity
+    :members:
+
+The Enums Class
+***************
+
+.. autoclass:: precon.Enums
+    :members:
+
+Reconstruction Functions
+************************
+
 calculate_sensitivities
 -----------------------
 

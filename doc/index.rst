@@ -10,6 +10,9 @@ Welcome to precon's documentation!
    :caption: precon Documentation
    :maxdepth: 2   
 
+   src/installation
+   src/getting_started
+   src/container
    src/reference
 
 Indices and tables
