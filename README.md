@@ -4,6 +4,10 @@ precon is a python package for reconstruction of Philips raw data.
 
 > **_NOTE:_ precon needs Python 3.7 or higher.**
 
+## Documentation
+
+Please refer to our [official documentation](https://docs.gyrotools.com/precon/latest/) for more information on how to use precon.
+
 ## Installation
 
 install precon using pip:
