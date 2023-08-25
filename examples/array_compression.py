@@ -1,3 +1,35 @@
+# ----------------------------------------------------------------------------------------
+# array_compression
+# ----------------------------------------------------------------------------------------
+# A SENSE (or CLEAR) reconstruction with array compression (coil combination)
+#
+# Args:
+#        rawfile (required)      : The path to the Philips rawfile to be reconstructed
+#        refscan (required)      : The path to the Philips SENSE reference scan
+#        virtual-coils (optional): The number of virtual coils after compression
+#        output_path (optional)  : The output path where the results are stored
+#
+# The reconstruction performed in this file consists of the following steps:
+#
+#   1. Read the parameters from the rawfile
+#   2. Reconstruct the SENSE reference scan
+#   3. Create a Parameter2Read class from the labels which defines what data to read
+#   4. Loop over all mixes and stacks
+#   5. Reformat the SENSE reference scan into the geometry of the target scan
+#   6. Calculate the array compression matrix from the SENSE reference data
+#   7. Compress the sensitivity maps with the compression matrix
+#   8. Read the data and compress it on the fly with the given compression matrix
+#   9. Sort and zero-fill the data according to the labels (create k-space)
+#  10. Apply a ringing filter
+#  11. Perform fourier transformation
+#  12. Shift the images such that they are aligned correctly
+#  13. Perform a SENSE reconstruction (unfolding)
+#  14. Perform a partial fourier (homodyne) reconstruction when halfscan or partial echo was enabled
+#  15. Perform the geometry correction
+#  16. Remove the oversampling along the phase encoding directions
+#  17. Transform the images into the radiological convention
+#  18. Make the images square
+
 import argparse
 from math import ceil
 from pathlib import Path
@@ -74,7 +106,7 @@ for mix in parameter2read.mix:
         if zshift:
             data = np.roll(data, zshift, axis=2)
 
-        regularization_factor = pars.goal.get_value(pars.SENSE_REGULARIZATION_FACTOR, at=0, default=2)
+        regularization_factor = pars.get_value(pars.SENSE_REGULARIZATION_FACTOR, at=0, default=2)
         output_size = pars.get_recon_resolution(mix=mix, xovs=False, yovs=True, zovs=True, folded=False)
         data = pr.sense_unfold(data, sens, output_size, regularization_factor=regularization_factor, use_torch=True)
 

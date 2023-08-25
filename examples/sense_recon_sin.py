@@ -1,18 +1,20 @@
 # ----------------------------------------------------------------------------------------
-# sense_recon
+# sense_recon_sin
 # ----------------------------------------------------------------------------------------
-# A cartesian SENSE (or CLEAR) reconstruction which calculates the sensitivity maps from the
-# rawfile of the SENSE reference scan
+# A cartesian SENSE (or CLEAR) reconstruction which reads the parameters from the Philips
+# sin file. This recon can be performed on data measured without the ReconFrame patch.
+# The Sensitivity maps are calculated from the cpx data of the SENSE reference scan. A .cpx
+# and .rc file of the reference scan must be available in the same folder as the rawfile.
 #
 # Args:
-#        rawfile (required)    : The path to the Philips rawfile to be reconstructed
-#        refscan (required)    : The path to the Philips SENSE reference scan
-#        output_path (optional): The output path where the results are stored
+#        sinfile (required)       : The path to the Philips sinfile
+#        output_path (optional)   : The output path where the results are stored
+#        refscan-folder (optional): The folder where the sense reference scan is located. If not provided, the refscan is searched in the same folder as the rawfile
 #
 # The reconstruction performed in this file consists of the following steps:
 #
 #   1. Read the parameters from the rawfile
-#   2. Reconstruct the SENSE reference scan
+#   2. Get the SENSE reference scan name from the .sin file and reconstruct it (read cpx file)
 #   3. Create a Parameter2Read class from the labels which defines what data to read
 #   4. Loop over all mixes and stacks
 #   5. Reformat the SENSE reference scan into the geometry of the target scan
@@ -36,22 +38,25 @@ from scipy.io import savemat
 
 import precon as pr
 
-parser = argparse.ArgumentParser(description="normal recon")
-parser.add_argument("rawfile", help="path to the raw or lab file")
-parser.add_argument("refscan", help="path to the sense reference scan")
-parser.add_argument(
-    "--output-path", default="./", help="path where the output is saved"
-)
+parser = argparse.ArgumentParser(description='normal recon')
+parser.add_argument('sinfile', help='path to the sin file')
+parser.add_argument('--output-path', default='./', help='path where the output is saved')
+parser.add_argument('--refscan-folder', default=None, help='the folder where the sense reference scan is located')
 args = parser.parse_args()
 
 # read parameter
-pars = pr.Parameter(Path(args.rawfile))
+pars = pr.Parameter(args.sinfile)
 
 # enable performance logging (reconstruction times)
 pars.performance_logging = True
 
 # reconstruct refscan
-ref_pars = pr.Parameter(Path(args.refscan))
+ref_filename = pars.get_value('coca_rc_file_names')
+refscan_folder = Path(args.refscan_folder) if args.refscan_folder else Path(args.sinfile).parent
+refscan = refscan_folder / ref_filename
+if not refscan.exists():
+    raise RuntimeError(f'no refscan found: {str(refscan)} does not exist')
+ref_pars = pr.Parameter(refscan)
 qbc, coil = pr.reconstruct_refscan(ref_pars)
 
 # define what to read
@@ -67,10 +72,10 @@ for mix in parameter2read.mix:
         parameter2read.mix = mix
 
         # calculate the sensitivities
-        sens = pr.reformat_refscan(qbc, coil, ref_pars, pars, stack=stack, mix=mix, match_target_size=True)
+        sens = pr.reformat_refscan(qbc, coil, ref_pars, pars, stack=stack, mix=mix, match_target_size=False)
 
         # read data
-        with open(pars.rawfile, "rb") as raw:
+        with open(pars.rawfile, 'rb') as raw:
             data, labels = pr.read(raw, parameter2read, pars.labels, pars.coil_info)
 
         # sort and zero fill data (create k-space)
@@ -107,7 +112,7 @@ for mix in parameter2read.mix:
 
         # perform geometry correction
         r, gys, gxc, gz = pars.get_geo_corr_pars()
-        locations = pr.utils.get_unique(labels, "loca")
+        locations = pr.utils.get_unique(labels, 'loca')
         MPS_to_XYZ = pars.get_transformation_matrix(loca=locations, mix=mix, target=pr.Enums.XYZ)
         voxel_sizes = pars.get_voxel_sizes(mix=mix)
         data = pr.geo_corr(data, MPS_to_XYZ, r, gys, gxc, gz, voxel_sizes=voxel_sizes)
@@ -115,7 +120,7 @@ for mix in parameter2read.mix:
         # remove the oversampling
         yovs = pars.get_oversampling(enc=1, mix=mix)
         zovs = pars.get_oversampling(enc=2, mix=mix)
-        data = pr.crop(data, axis=(1, 2), factor=(yovs, zovs), where="symmetric")
+        data = pr.crop(data, axis=(1, 2), factor=(yovs, zovs), where='symmetric')
 
         # transform the images into the radiological convention
         data = pr.format(data, pars.get_in_plane_transformation(mix=mix, stack=stack))
@@ -125,9 +130,9 @@ for mix in parameter2read.mix:
         data = pr.zeropad(data, (res, res), axis=(0, 1))
 
         # save data and sensitivities in .mat format
-        mdic[f"data_{mix}_{stack}"] = data
-        mdic[f"sensitivity_{mix}_{stack}"] = sens.sensitivity
-        mdic[f"coil_ref_{mix}_{stack}"] = sens.surfacecoil
-        mdic[f"body_ref{mix}_{stack}"] = sens.bodycoil
+        mdic[f'data_{mix}_{stack}'] = data
+        mdic[f'sensitivity_{mix}_{stack}'] = sens.sensitivity
+        mdic[f'coil_ref_{mix}_{stack}'] = sens.surfacecoil
+        mdic[f'body_ref{mix}_{stack}'] = sens.bodycoil
 
-savemat(Path(args.output_path) / "data.mat", mdic)
+savemat(Path(args.output_path) / 'data.mat', mdic)

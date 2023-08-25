@@ -1,3 +1,11 @@
+# ----------------------------------------------------------------------------------------
+# read_k0
+# ----------------------------------------------------------------------------------------
+# Reads all central k-space profiles (ky = kz = 0)
+#
+# Args:
+#        rawfile (required)    : The path to the Philips rawfile to be reconstructed
+
 import argparse
 from pathlib import Path
 

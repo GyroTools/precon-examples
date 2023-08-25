@@ -1,12 +1,12 @@
 # ----------------------------------------------------------------------------------------
-# cardiac_retro_recon
+# simple_recon_sin
 # ----------------------------------------------------------------------------------------
-# Performs a reconstruction of a retrospectively triggered cardiac acquisition
+# A simple cartesian reconstruction without SENSE which reads the parameters from the Philips
+# sin file. This recon can be performed on data measured without the ReconFrame patch.
 #
 # Args:
-#        rawfile (required)    : The path to the Philips rawfile to be reconstructed
+#        sinfile (required)    : The path to the Philips sinfile
 #        output_path (optional): The output path where the results are stored
-#        nr_phases   (optional): The number of cardiac phases to be reconstructed
 #
 # The reconstruction performed in this file consists of the following steps:
 #
@@ -14,17 +14,15 @@
 #   2. Create a Parameter2Read class from the labels which defines what data to read
 #   3. Loop over all mixes and stacks
 #   4. Read the data from the current mix and stack (the basic corrections as well as the oversampling removal in readout direction is performed in the reader)
-#   5. Cardiac binning. A heart phase number is assigned to every acquired k-space profile.
-#   6. Sort and zero-fill the data according to the labels (create k-space)
-#   7. Fill the holes k-space due to an irregular heart rate, or if the reconstructed heart phases are larger than the acquired ones. The holes are filled by a nearest neighbour interpolation over time.
-#   8. Perform fourier transformation
-#   9. Shift the images such that they are aligned correctly
-#  10. Perform a partial fourier (homodyne) reconstruction when halfscan or partial echo was enabled
-#  11. Combine the coils with a sum-of-squares combination
-#  12. Perform the geometry correction
-#  13. Remove the oversampling along the phase encoding directions
-#  14. Transform the images into the radiological convention
-#  15. Make the images square
+#   5. Sort and zero-fill the data according to the labels (create k-space)
+#   6. Perform fourier transformation
+#   7. Shift the images such that they are aligned correctly
+#   8. Perform a partial fourier (homodyne) reconstruction when halfscan or partial echo was enabled
+#   9. Combine the coils with a sum-of-squares combination
+#  10. Perform the geometry correction
+#  11. Remove the oversampling along the phase encoding directions
+#  12. Transform the images into the radiological convention
+#  13. Make the images square
 
 import argparse
 from pathlib import Path
@@ -34,15 +32,13 @@ from scipy.io import savemat
 
 import precon as pr
 
-
 parser = argparse.ArgumentParser(description='normal recon')
-parser.add_argument('rawfile', help='path to the raw or lab file')
+parser.add_argument('sinfile', help='path to the sin file')
 parser.add_argument('--output-path', default='./', help='path where the output is saved')
-parser.add_argument('--nr_phases', type=int, default=None, help='the number of cardiac phases to be reconstructed')
 args = parser.parse_args()
 
 # read parameter
-pars = pr.Parameter(Path(args.rawfile))
+pars = pr.Parameter(args.sinfile)
 
 # define what to read
 parameter2read = pr.Parameter2Read(pars.labels)
@@ -60,22 +56,12 @@ for mix in parameter2read.mix:
         parameter2read.mix = mix
 
         # read data
-        with open(args.rawfile, 'rb') as raw:
+        with open(pars.rawfile, 'rb') as raw:
             data, labels = pr.read(raw, parameter2read, pars.labels, pars.coil_info)
-
-        # retrospective cardiac binning
-        nr_phases = args.nr_phases if args.nr_phases else pars.get_nr_phases()
-        labels = pr.retro_binning(labels, nr_phases)
 
         # sort and zero fill data (create k-space)
         cur_recon_resolution = pars.get_recon_resolution(mix=mix, xovs=False, yovs=True, zovs=True)
         data, labels = pr.sort(data, labels, output_size=cur_recon_resolution)
-
-        # fill the holes in k-space due to retrospective binning
-        data = pr.retro_fill_holes(data)
-
-        mdic[f'data'] = data
-        savemat(Path(args.output_path) / 'kspace.mat', mdic)
 
         # FFT
         data = pr.k2i(data, axis=(0, 1, 2))

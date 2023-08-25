@@ -1,3 +1,16 @@
+# ----------------------------------------------------------------------------------------
+# calculate_sensitivities
+# ----------------------------------------------------------------------------------------
+# Calculates the sensitivity maps from a Philips reference scan
+#
+# Args:
+#        refscan (required)          : The path to the Philips SENSE reference scan
+#        target_scan (required)      : The path to the SENSE scan (target scan)
+#        output_path (optional)      : The output path where the results are stored
+#        match-target-size (optional): When given the sensitivity maps have the same size as the target images
+#        fov (optional)              : A user defined field-of-view for the sensitivity maps
+#        output_size (optional)      : A user defined output size for the sensitivity maps
+
 import argparse
 from pathlib import Path
 

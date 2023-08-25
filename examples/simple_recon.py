@@ -1,3 +1,28 @@
+# ----------------------------------------------------------------------------------------
+# simple_recon
+# ----------------------------------------------------------------------------------------
+# A simple cartesian reconstruction without SENSE.
+#
+# Args:
+#        rawfile (required)    : The path to the Philips rawfile to be reconstructed
+#        output_path (optional): The output path where the results are stored
+#
+# The reconstruction performed in this file consists of the following steps:
+#
+#   1. Read the parameters from the sinfile
+#   2. Create a Parameter2Read class from the labels which defines what data to read
+#   3. Loop over all mixes and stacks
+#   4. Read the data from the current mix and stack (the basic corrections as well as the oversampling removal in readout direction is performed in the reader)
+#   5. Sort and zero-fill the data according to the labels (create k-space)
+#   6. Perform fourier transformation
+#   7. Shift the images such that they are aligned correctly
+#   8. Perform a partial fourier (homodyne) reconstruction when halfscan or partial echo was enabled
+#   9. Combine the coils with a sum-of-squares combination
+#  10. Perform the geometry correction
+#  11. Remove the oversampling along the phase encoding directions
+#  12. Transform the images into the radiological convention
+#  13. Make the images square
+
 import argparse
 from pathlib import Path
 
@@ -6,10 +31,11 @@ from scipy.io import savemat
 
 import precon as pr
 
-
-parser = argparse.ArgumentParser(description='normal recon')
-parser.add_argument('rawfile', help='path to the raw or lab file')
-parser.add_argument('--output-path', default='./', help='path where the output is saved')
+parser = argparse.ArgumentParser(description="normal recon")
+parser.add_argument("rawfile", help="path to the raw or lab file")
+parser.add_argument(
+    "--output-path", default="./", help="path where the output is saved"
+)
 args = parser.parse_args()
 
 # read parameter
@@ -31,7 +57,7 @@ for mix in parameter2read.mix:
         parameter2read.mix = mix
 
         # read data
-        with open(args.rawfile, 'rb') as raw:
+        with open(pars.rawfile, "rb") as raw:
             data, labels = pr.read(raw, parameter2read, pars.labels, pars.coil_info)
 
         # sort and zero fill data (create k-space)
@@ -61,7 +87,7 @@ for mix in parameter2read.mix:
 
         # perform geometry correction
         r, gys, gxc, gz = pars.get_geo_corr_pars()
-        locations = pr.utils.get_unique(labels, 'loca')
+        locations = pr.utils.get_unique(labels, "loca")
         MPS_to_XYZ = pars.get_transformation_matrix(loca=locations, mix=mix, target=pr.Enums.XYZ)
         voxel_sizes = pars.get_voxel_sizes(mix=mix)
         data = pr.geo_corr(data, MPS_to_XYZ, r, gys, gxc, gz, voxel_sizes=voxel_sizes)
@@ -69,7 +95,7 @@ for mix in parameter2read.mix:
         # remove the oversampling
         yovs = pars.get_oversampling(enc=1, mix=mix)
         zovs = pars.get_oversampling(enc=2, mix=mix)
-        data = pr.crop(data, axis=(1, 2), factor=(yovs, zovs), where='symmetric')
+        data = pr.crop(data, axis=(1, 2), factor=(yovs, zovs), where="symmetric")
 
         # transform the images into the radiological convention
         data = pr.format(data, pars.get_in_plane_transformation(mix=mix, stack=stack))
@@ -79,6 +105,6 @@ for mix in parameter2read.mix:
         data = pr.zeropad(data, (res, res), axis=(0, 1))
 
         # save data in .mat format
-        mdic[f'data_{mix}_{stack}'] = data
+        mdic[f"data_{mix}_{stack}"] = data
 
-savemat(Path(args.output_path) / 'data.mat', mdic)
+savemat(Path(args.output_path) / "data.mat", mdic)

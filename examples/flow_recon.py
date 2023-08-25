@@ -1,3 +1,39 @@
+# ----------------------------------------------------------------------------------------
+# flow_recon
+# ----------------------------------------------------------------------------------------
+# Reconstruction of flow data using SENSE
+#
+# Args:
+#        rawfile (required)    : The path to the Philips rawfile to be reconstructed
+#        refscan (required)    : The path to the Philips SENSE reference scan
+#        output_path (optional): The output path where the results are stored
+#
+# The reconstruction performed in this file consists of the following steps:
+#
+#   1. Read the parameters from the rawfile
+#   2. Reconstruct the SENSE reference scan
+#   3. Create a Parameter2Read class from the labels which defines what data to read
+#   4. Check if the current scan is a flow acquisition
+#   5. Loop over all mixes and stacks
+#   6. Reformat the SENSE reference scan into the geometry of the target scan
+#   7. Loop over the flow segments and reconstruct each segment individually
+#   8. Read the data from the current mix, stack and flow segment. (the basic corrections as well as the oversampling removal in readout direction is performed in the reader)
+#   9. Sort and zero-fill the data according to the labels (create k-space)
+#  10. Apply a ringing filter
+#  11. Perform fourier transformation
+#  12. Shift the images such that they are aligned correctly
+#  13. Perform a SENSE reconstruction (unfolding)
+#  14. Perform a partial fourier (homodyne) reconstruction when halfscan or partial echo was enabled
+#  15. Store the data from each segment
+#  16. Perform the concomitant field correction
+#  17. Subtract the non-encoded flow segment from the encoded ones
+#  18. Perform the geometry correction
+#  19. Remove the oversampling along the phase encoding directions
+#  20. Remove the background phase due to eddy currents by fitting the static tissue
+#  21. Transform the images into the radiological convention
+#  22. Make sure the flow phase is along RL-AP-FH
+#  23. Make the images square
+
 import argparse
 from pathlib import Path
 
@@ -71,7 +107,8 @@ for mix in parameter2read.mix:
             if zshift:
                 data_seg = np.roll(data_seg, zshift, axis=2)
 
-            regularization_factor = pars.goal.get_value(pars.SENSE_REGULARIZATION_FACTOR, at=0, default=2)
+            # SENSE unfolding
+            regularization_factor = pars.get_value(pars.SENSE_REGULARIZATION_FACTOR, at=0, default=2)
             output_size = pars.get_recon_resolution(mix=mix, xovs=False, yovs=True, zovs=True, folded=False)
             data_seg = pr.sense_unfold(data_seg, sens, output_size, regularization_factor=regularization_factor, use_torch=True)
 
