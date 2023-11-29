@@ -107,4 +107,14 @@ for mix in parameter2read.mix:
         # save data in .mat format
         mdic[f"data_{mix}_{stack}"] = data
 
+        # export the data as par/rec
+        scaling = pr.Recfile.get_scaling(data, types=(pr.Enums.REC_IMAGE_TYPE_M,))
+        rec = pr.Recfile(data, types=(pr.Enums.REC_IMAGE_TYPE_M,), scaling=scaling)
+        savemat(Path(args.output_path) / "rec.mat", {'rec': rec})
+        par = pr.Parfile(pars, data, labels, types=(pr.Enums.REC_IMAGE_TYPE_M,))
+        filename_par = Path(args.output_path) / f'{pars.rawfile.stem}_{mix}_{stack}.par'
+        filename_rec = Path(args.output_path) / f'{pars.rawfile.stem}_{mix}_{stack}.rec'
+        par.write(filename_par)
+        rec.write(filename_rec)
+
 savemat(Path(args.output_path) / "data.mat", mdic)
