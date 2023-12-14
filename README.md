@@ -2,7 +2,10 @@
 
 precon is a python package for reconstruction of Philips raw data.
 
-> **_NOTE:_ precon needs Python 3.7 or higher.**
+> **_NOTE:_ precon requires the Python version:\
+        &nbsp;&nbsp; - Python 3.7 or later for Windows, Linux, and Mac with Intel processor.\
+        &nbsp;&nbsp; - Python 3.9 or later for Mac with Apple Silicon.
+.**
 
 ## Documentation
 
