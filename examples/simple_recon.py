@@ -111,7 +111,7 @@ for mix in parameter2read.mix:
         scaling = pr.Recfile.get_scaling(data, types=(pr.Enums.REC_IMAGE_TYPE_M,))
         rec = pr.Recfile(data, types=(pr.Enums.REC_IMAGE_TYPE_M,), scaling=scaling)
         savemat(Path(args.output_path) / "rec.mat", {'rec': rec})
-        par = pr.Parfile(pars, data, labels, types=(pr.Enums.REC_IMAGE_TYPE_M,))
+        par = pr.Parfile(pars, data, labels, types=(pr.Enums.REC_IMAGE_TYPE_M,), scaling=scaling)
         filename_par = Path(args.output_path) / f'{pars.rawfile.stem}_{mix}_{stack}.par'
         filename_rec = Path(args.output_path) / f'{pars.rawfile.stem}_{mix}_{stack}.rec'
         par.write(filename_par)
