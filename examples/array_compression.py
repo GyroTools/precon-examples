@@ -108,7 +108,7 @@ for mix in parameter2read.mix:
 
         regularization_factor = pars.get_value(pars.SENSE_REGULARIZATION_FACTOR, at=0, default=2)
         output_size = pars.get_recon_resolution(mix=mix, xovs=False, yovs=True, zovs=True, folded=False)
-        data = pr.sense_unfold(data, sens, output_size, regularization_factor=regularization_factor, use_torch=True)
+        data = pr.sense_unfold(data, sens, output_size, regularization_factor=regularization_factor)
 
         # partial fourier reconstruction
         kx_range = pars.get_range(enc=0, mix=mix, stack=stack, ovs=False)

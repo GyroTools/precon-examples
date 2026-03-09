@@ -96,12 +96,12 @@ for mix in parameter2read.mix:
         # SENSE unfolding
         regularization_factor = pars.get_value(pars.SENSE_REGULARIZATION_FACTOR, at=0, default=2)
         output_size = pars.get_recon_resolution(mix=mix, xovs=False, yovs=True, zovs=True, folded=False)
-        data = pr.sense_unfold(data, sens, output_size, regularization_factor=regularization_factor, use_torch=True)
+        data = pr.sense_unfold(data, sens, output_size, regularization_factor=regularization_factor)
 
         # partial fourier reconstruction
-        kx_range = pars.get_range(enc=0, mix=mix, stack=stack, ovs=False)
-        ky_range = pars.get_range(enc=1, mix=mix, stack=stack)
-        kz_range = pars.get_range(enc=2, mix=mix, stack=stack)
+        kx_range = pars.get_range(enc=0, mix=mix, stack=stack, unfolded=True, ovs=False)
+        ky_range = pars.get_range(enc=1, mix=mix, stack=stack, unfolded=True)
+        kz_range = pars.get_range(enc=2, mix=mix, stack=stack, unfolded=True)
         if pr.is_partial_fourier(kx_range) or pr.is_partial_fourier(ky_range) or pr.is_partial_fourier(kz_range):
             data = pr.homodyne(data, kx_range, ky_range, kz_range)
 
